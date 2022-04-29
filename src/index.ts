@@ -17,7 +17,7 @@ class MyBot implements Bot {
             this.mcmc.updateProbabilities(gamestate.rounds[gamestate.rounds.length - 2], gamestate.rounds[gamestate.rounds.length - 1]);
             myMove = this.possibleMoves[this.mcmc.getMoveIndex(gamestate.rounds[gamestate.rounds.length - 1])];
         }
-        else {myMove = this.getRandomMove();}
+        else {myMove = this.getRandomRPSMove();}
 
         this.round ++
 
@@ -27,7 +27,7 @@ class MyBot implements Bot {
             this.possibleMoves.pop();
             this.myDynamite = -1;
         }
-        console.log(gamestate);
+
         return myMove;
 
     }
@@ -61,7 +61,7 @@ class MCMCProbs {
     }
 
     getMoveIndex (lastRound : Round) : number {
-        let pointArray : number[][] = [[0.5, 0, 1, 1, 1], [1, 0.5, 0, 1, 0], [0, 1, 0.5, 1, 0], [0, 0, 0, 0.5, 1], [0.75, 0.75, 0.75, 0, 0.5]];
+        const pointArray : number[][] = [[0.5, 0, 1, 1, 1], [1, 0.5, 0, 1, 0], [0, 1, 0.5, 1, 0], [0, 0, 0, 0.5, 1], [0.75, 0.75, 0.75, 0, 0.5]];
         let expectedPoints : number[] = [0, 0, 0, 0, 0];
         let node = this.listNodes[this.listNodes.findIndex(node => {
             return (node.lastP1 === lastRound.p1 && node.lastP2 === lastRound.p2)
@@ -72,6 +72,7 @@ class MCMCProbs {
                 expectedPoints[i] += pointArray[i][j] * node.nextMoveProbabilities[j];
             }
         }
+        console.log(`node { Last p1 = ${node.lastP1} , last p2 = ${node.lastP2} , next Move Probabilities = ${node.nextMoveProbabilities} ; expected Points = ${expectedPoints}`)
         const maxExpectedPoints = Math.max(...expectedPoints);
         return  expectedPoints.indexOf(maxExpectedPoints);
     }
@@ -90,15 +91,16 @@ class Node {
         this.nextMoveProbabilities = [0.25, 0.25, 0.25, 0.05, 0.2];
     }
     nextMoveProbabilitiesUpdate (move : Move){
+
         for (let i = 0; i < 5; i++ ){
             if (i === this.allMoves.indexOf(move)){
-                this.nextMoveProbabilities[this.allMoves.indexOf(move)] = 1;
-
+                this.nextMoveProbabilities[i] = 1;
             }
             else {
-                this.nextMoveProbabilities[this.allMoves.indexOf(move)] = 0;
+                this.nextMoveProbabilities[i] = 0;
             }
         }
+        //console.log(`Node: {${this.lastP1}, ${this.lastP2}} updated: next move Probabilities = [${this.nextMoveProbabilities}]`)
     }
 }
 
