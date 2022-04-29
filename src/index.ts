@@ -7,6 +7,7 @@ class MyBot implements Bot {
     round = 0;
 
     possibleMoves: Move[] = ['R', 'P', 'S', 'W', 'D']
+    drawCount = 0;
     mcmcComplex = new MCMCComplex();
     mcmcBasic = new MCMCBasic();
 
@@ -14,6 +15,9 @@ class MyBot implements Bot {
 
         let myMove: Move;
         if (this.round > 1) {
+
+            this.updateDrawCount(gamestate.rounds[gamestate.rounds.length - 1])
+
             if (this.round > 2) {
                 this.mcmcComplex.updatePotentialScore(gamestate.rounds[gamestate.rounds.length - 1]);
                 this.mcmcBasic.updatePotentialScore(gamestate.rounds[gamestate.rounds.length - 1]);
@@ -26,19 +30,24 @@ class MyBot implements Bot {
 
             if (this.mcmcBasic.potentialScore > this.mcmcComplex.potentialScore) {
                 myMove = this.mcmcBasic.suggestedMoveList[this.mcmcBasic.suggestedMoveList.length - 1];
-                console.log(`myMove from Basic = ${myMove} with potential score: ${this.mcmcBasic.potentialScore}`)
+                //console.log(`myMove from Basic = ${myMove} with potential score: ${this.mcmcBasic.potentialScore}`)
             } else {
                 myMove = this.mcmcComplex.suggestedMoveList[this.mcmcComplex.suggestedMoveList.length - 1];
-                console.log(`myMove from Complex = ${myMove} with potential score: ${this.mcmcComplex.potentialScore}`)
+                //console.log(`myMove from Complex = ${myMove} with potential score: ${this.mcmcComplex.potentialScore}`)
             }
-            console.log(`basic score = ${this.mcmcBasic.potentialScore}. complex score = ${this.mcmcComplex.potentialScore}`)
+            //console.log(`basic score = ${this.mcmcBasic.potentialScore}. complex score = ${this.mcmcComplex.potentialScore}`)
         } else {
             myMove = this.getRandomRPSMove();
         }
 
-        this.round++
-//console.log(`Round = ${this.round}; myMove = ${myMove}; Dynamite remaining = ${this.myDynamite}; possible moves = ${this.possibleMoves}`);
+        if ((Math.random() * 5 ) < this.drawCount&& this.myDynamite > 0) {
+            myMove = "D"
+        }
 
+        this.round++
+
+
+        if (myMove === "D") this.myDynamite --;
         return myMove;
 
     }
@@ -51,6 +60,15 @@ class MyBot implements Bot {
         return this.possibleMoves[Math.floor(Math.random() * 3)];
     }
 
+    updateDrawCount(lastRound : Round){
+        let possibleMoves: Move[] = ['R', 'P', 'S', 'W', 'D']
+        let pointArray: number[][] = [[1, 0, 0, 0, 0], [0, 1, 0, 0, 0], [0, 0, 1, 0, 0], [0, 0, 0, 1, 0], [0, 0, 0, 0, 1]];
+        if (pointArray[possibleMoves.indexOf(lastRound.p1)][possibleMoves.indexOf(lastRound.p2)] === 1){
+            this.drawCount += 1;
+        }
+        else {this.drawCount = 0;
+        }
+    }
 }
 
 class model {
