@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run build-and-play-against -- tools/rockBot.js",
+    "startVsMCMCBase": "npm run build-and-play-against -- tools/BaseMCMCBot.js",
     "build-and-play-against": "npm run clean-build && npm run play-against",
     "play-against": "node tools/dynamite-cli.js dist/index.js",
     "clean-build": "rimraf dist && tsc"
